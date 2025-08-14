@@ -1,18 +1,27 @@
 import React from "react";
 import { CiFaceSmile } from "react-icons/ci";
 import { VscSend } from "react-icons/vsc";
+import { IoIosAttach } from "react-icons/io";
 
 const Chart = () => {
   return (
-    <div className="flex items-center w-1/2 relative">
-      <CiFaceSmile size={25} className=" absolute left-3 top-1" />
+    <div className="flex items-center w-1/2 relative border border-gray-500 px-2 py-1 gap-1  bg-[#FAFBF8] rounded-4xl top-60 left-28">
+      <div className="flex items-center gap-2">
+        <span className="p-1 hover:bg-gray-200 rounded-xl ">
+          <CiFaceSmile size={20} />
+        </span>
+        <span className="p-1 hover:bg-gray-200 rounded-xl">
+          <IoIosAttach size={20} />
+        </span>
+      </div>
       <input
         type="text"
         placeholder=" Send message"
-        className=" w-full px-2 py-1 rounded-3xl border-2 border-black "
+        className=" w-full px-2 py-1 outline-none"
       />
-
-      <VscSend size={25} />
+      <span className="hover:bg-gray-200 rounded-xl p-1">
+        <VscSend size={25} className="text-[#000000]" />
+      </span>
     </div>
   );
 };
