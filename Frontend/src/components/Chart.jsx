@@ -5,7 +5,7 @@ import { IoIosAttach } from "react-icons/io";
 
 const Chart = () => {
   return (
-    <div className="flex items-center w-1/2 relative border border-gray-500 px-2 py-1 gap-1  bg-[#FAFBF8] rounded-4xl top-60 left-28">
+    <div className="flex items-center w-[70%] border border-gray-500 px-2 py-1 gap-1  bg-[#FAFBF8] rounded-4xl">
       <div className="flex items-center gap-2">
         <span className="p-1 hover:bg-gray-200 rounded-xl ">
           <CiFaceSmile size={20} />
