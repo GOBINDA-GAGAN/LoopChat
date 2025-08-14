@@ -5,7 +5,7 @@ import { VscSend } from "react-icons/vsc";
 const Chart = () => {
   return (
     <div className="flex items-center w-1/2">
-      <CiFaceSmile size={25} className=" absolute left-3" />
+      <CiFaceSmile size={25} className=" absolute left-3 top-1" />
       <input
         type="text"
         placeholder=" Send message"
