@@ -2,6 +2,7 @@ import { OtpGenerator } from "../utils/OtpGenerator.js";
 import { response } from "../utils/responseHendel.js";
 import User from "../models/usermodel.js";
 import { sendOtpEmail } from "../services/emailService.js";
+import { generateToken } from "../services/generatedToken.js";
 
 export const sendOtp = async (req, res) => {
   const { phoneNumber, phoneSuffix, email } = req.body;
@@ -98,6 +99,14 @@ export const verifyOtp = async (req, res) => {
       user.isVerified = true;
       await user.save();
     }
+
+    const token = generateToken(user?._id);
+    res.cookie("auth_token", token, {
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 365,
+    });
+
+    return response(res, 200, "opt verify successfully", { token, user });
   } catch (error) {
     console.error("verify OTP Error:", error);
     return response(res, 500, "Internal server error");
