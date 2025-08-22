@@ -76,7 +76,7 @@ export const verifyOtp = async (req, res) => {
         String(user.emailOtp) !== String(otp) ||
         now > new Date(user.emailOtpExpiry)
       ) {
-        response((res, 400, "Invalid or expired  otp"));
+        response(res, 400, "Invalid or expired  otp");
       }
       user.isVerified = true;
       user.emailOtp = null;
@@ -100,7 +100,7 @@ export const verifyOtp = async (req, res) => {
       await user.save();
     }
 
-    const token = generateToken(user?._id);
+    const token = generateToken(user._id);
     res.cookie("auth_token", token, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 365,
