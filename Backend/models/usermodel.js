@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    name: {},
     phoneNumber: {
       type: String,
       unique: true,
@@ -14,7 +13,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       match: /^\S+@\S+\.\S+$/,
     },
-    name: { type: String },
+    username: { type: String },
 
     emailOtp: {
       type: String,

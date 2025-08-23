@@ -3,6 +3,7 @@ import { response } from "../utils/responseHendel.js";
 import User from "../models/usermodel.js";
 import { sendOtpEmail } from "../services/emailService.js";
 import { generateToken } from "../services/generatedToken.js";
+import { uploadFileToCloudinary } from "../config/Cloudnary.js";
 
 export const sendOtp = async (req, res) => {
   const { phoneNumber, phoneSuffix, email } = req.body;
@@ -109,6 +110,42 @@ export const verifyOtp = async (req, res) => {
     return response(res, 200, "opt verify successfully", { token, user });
   } catch (error) {
     console.error("verify OTP Error:", error);
+    return response(res, 500, "Internal server error");
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  const { username, agreed, about } = req.body;
+
+  const userId = req.user.userId;
+  console.log(userId);
+  
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return response(res, 404, "User not found");
+    }
+    const file = req.file;
+    if (file) {
+      const uploadResult = await uploadFileToCloudinary(file);
+      user.profilePic = uploadResult.secure_url;
+    } else if (req.body.profilePic) {
+      user.profilePic = req.body.profilePic;
+    }
+    if (username) {
+      user.username = username;
+    }
+    if (agreed) {
+      user.agreed = agreed;
+    }
+    if (about) {
+      user.about = about;
+    }
+    await user.save();
+
+    return response(res, 200, "user profile update successfully", user);
+  } catch (error) {
+    console.error("update profile Error:", error);
     return response(res, 500, "Internal server error");
   }
 };
