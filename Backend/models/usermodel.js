@@ -5,12 +5,15 @@ const userSchema = new mongoose.Schema(
     phoneNumber: {
       type: String,
       unique: true,
+       sparse: true,
     },
     phoneSuffix: { type: String, unique: false },
 
     email: {
       type: String,
       lowercase: true,
+       unique: true,
+       sparse: true,
       match: /^\S+@\S+\.\S+$/,
     },
     username: { type: String },
@@ -21,7 +24,7 @@ const userSchema = new mongoose.Schema(
     emailOtpExpiry: { type: Date },
     profilePic: {
       type: String,
-    },
+    }, 
     about: {
       type: String,
     },
@@ -30,7 +33,7 @@ const userSchema = new mongoose.Schema(
     },
     isOnline: {
       type: Boolean,
-      default: false,
+      default: false, 
     },
     isVerified: {
       type: Boolean,

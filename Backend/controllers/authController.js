@@ -4,10 +4,11 @@ import User from "../models/usermodel.js";
 import { sendOtpEmail } from "../services/emailService.js";
 import { generateToken } from "../services/generatedToken.js";
 import { uploadFileToCloudinary } from "../config/Cloudnary.js";
+import { assign } from "nodemailer/lib/shared/index.js";
+import Conversation from "../models/conversation_model.js";
 
 export const sendOtp = async (req, res) => {
   const { phoneNumber, phoneSuffix, email } = req.body;
-
   const otp = OtpGenerator();
   const expiry = new Date(Date.now() + 5 * 60 * 1000);
 
@@ -28,17 +29,16 @@ export const sendOtp = async (req, res) => {
 
       await sendOtpEmail(email, otp);
 
-      return response(res, 200, "OTP sent successfully to your email", {
-        email,
-      });
+      return response(res, 200, "OTP sent to your email", { email });
     }
 
     // ✅ PHONE-BASED OTP
     if (!phoneNumber || !phoneSuffix) {
-      return response(res, 400, "Phone number and phone suffix are required");
+      return response(res, 400, "Phone number and suffix are required");
     }
 
     const fullPhoneNumber = `${phoneSuffix}${phoneNumber}`;
+
     user = await User.findOne({ phoneNumber, phoneSuffix });
 
     if (!user) {
@@ -47,12 +47,10 @@ export const sendOtp = async (req, res) => {
 
     user.phoneOtp = otp;
     user.phoneOtpExpiry = expiry;
-
-    console.log("Sending OTP to:", fullPhoneNumber);
-
     await user.save();
 
-    return response(res, 200, "OTP sent successfully to your mobile", {
+    console.log("Sending OTP to:", fullPhoneNumber);
+    return response(res, 200, "OTP sent to your mobile", {
       phoneNumber: fullPhoneNumber,
     });
   } catch (error) {
@@ -60,6 +58,7 @@ export const sendOtp = async (req, res) => {
     return response(res, 500, "Internal server error");
   }
 };
+
 
 export const verifyOtp = async (req, res) => {
   const { phoneNumber, phoneSuffix, email, otp } = req.body;
@@ -119,7 +118,7 @@ export const updateProfile = async (req, res) => {
 
   const userId = req.user.userId;
   console.log(userId);
-  
+
   try {
     const user = await User.findById(userId);
     if (!user) {
@@ -146,6 +145,69 @@ export const updateProfile = async (req, res) => {
     return response(res, 200, "user profile update successfully", user);
   } catch (error) {
     console.error("update profile Error:", error);
+    return response(res, 500, "Internal server error");
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    res.cookie("auth_token", "", {
+      expiry: Date.now(0),
+    });
+    return response(res, 200, "Logout successfully");
+  } catch (error) {
+    console.error("logout:", error);
+    return response(res, 500, "Internal server error");
+  }
+};
+
+export const checkAuthenticate = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    if (!userId) {
+      return response(res, 404, "Please login before access our LoopChart");
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return response(res, 404, "User not found");
+    }
+
+    return response(res, 200, "User retrieved successfully", user);
+  } catch (error) {
+    console.error("checkAuthenticate:", error);
+    return response(res, 500, "Internal server error");
+  }
+};
+
+export const getAllUser = async (req, res) => {
+  try {
+    const currentUse_or_me = req.user.userId;
+    const users = await User.find({ _id: { $ne: currentUse_or_me } })
+      .select(
+        "username profilePic lastSeen isOnline phoneNumber phoneSuffix about"
+      )
+      .lean();
+    const userConversation = await Promise.all(
+      users.map(async (user) => {
+        const conversation = await Conversation.findOne({
+          participants: { $all: [currentUse_or_me, user._id] },
+        })
+          .populate({
+            path: "lastMassage",
+            select: "content createdAt sender receiver",
+          })
+          .lean();
+        return {
+          ...user,
+          conversation: conversation || null,
+        };
+      })
+    );
+
+    return response(res, 200, "User retrieved successfully", userConversation);
+  } catch (error) {
+    console.error("getAllUser;", error);
     return response(res, 500, "Internal server error");
   }
 };
